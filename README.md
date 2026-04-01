@@ -9,7 +9,7 @@
 - **向量数据库**: ChromaDB (PersistentClient, cosine 距离)
 - **重排序**: `cross-encoder/ms-marco-MiniLM-L-6-v2`
 - **LLM**: LM Studio 本地运行 Qwen3.5-4B-Q8 (`http://localhost:1234/v1`, OpenAI 兼容 API)
-- **LLM 模型路径**: `需在LM Studio自行下载并挂载Qwen3.5-4B-Q8_0.gguf`
+- **LLM 模型路径**: 需在LM Studio自行下载并挂载 `Qwen3.5-4B-Q8_0.gguf` 或其他LLM
 - **界面**: CLI (rich) + Gradio Web UI
 
 ## 项目结构

@@ -1,0 +1,16 @@
+# Core
+pyyaml>=6.0
+python-frontmatter>=1.1.0
+tqdm>=4.66.0
+rich>=13.7.0
+
+# ML / Embedding
+sentence-transformers>=3.0.0
+chromadb>=0.5.0
+langchain-text-splitters>=0.2.0
+
+# LLM (OpenAI-compatible client for LM Studio)
+openai>=1.30.0
+
+# Web UI
+gradio>=4.40.0

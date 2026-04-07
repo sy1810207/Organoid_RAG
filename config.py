@@ -29,6 +29,11 @@ LLM_API_KEY = "lm-studio"
 LLM_MODEL = "qwen3.5-4b"
 MAX_CONTEXT_TOKENS = 4096
 
+# === Evaluation ===
+EVAL_DIR = PROJECT_ROOT / "eval"
+TESTSET_DIR = EVAL_DIR / "testsets"
+EVAL_RESULTS_DIR = PROJECT_ROOT / "data" / "eval_results"
+
 # === Noise sections to skip in full-text articles ===
 SKIP_SECTIONS = {
     "references", "bibliography", "author contributions",

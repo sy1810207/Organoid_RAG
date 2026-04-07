@@ -25,6 +25,13 @@ class RetrievalResult:
         )
 
 
+@dataclass
+class StagedRetrievalResult:
+    """Results from both retrieval stages for evaluation comparison."""
+    vector_results: list[RetrievalResult]
+    reranked_results: list[RetrievalResult]
+
+
 class Retriever:
     def __init__(
         self,
@@ -85,3 +92,56 @@ class Retriever:
                 break
 
         return final_results
+
+    def retrieve_with_stages(
+        self,
+        query: str,
+        top_k: int = TOP_K,
+        rerank_top_n: int = RERANK_TOP_N,
+        where: dict | None = None,
+    ) -> StagedRetrievalResult:
+        """Retrieve with both pre-rerank and post-rerank results for evaluation."""
+        # 1. Embed query
+        query_emb = self.embedder.embed_query(query)
+
+        # 2. Vector search
+        results = self.vectorstore.query(query_emb, top_k=top_k, where=where)
+
+        if not results["documents"] or not results["documents"][0]:
+            return StagedRetrievalResult([], [])
+
+        documents = results["documents"][0]
+        metadatas = results["metadatas"][0]
+        distances = results["distances"][0]
+
+        # Vector-stage results (ordered by cosine similarity)
+        vector_results = [
+            RetrievalResult(text=doc, score=1.0 - dist, metadata=meta)
+            for doc, meta, dist in zip(documents, metadatas, distances)
+        ]
+
+        # 3. Cross-encoder reranking
+        pairs = [(query, doc) for doc in documents]
+        scores = self.reranker.predict(pairs)
+
+        ranked = sorted(
+            zip(documents, metadatas, scores),
+            key=lambda x: x[2],
+            reverse=True,
+        )
+
+        # 4. Deduplicate and select top_n
+        seen_docs = set()
+        reranked_results = []
+        for doc_text, meta, score in ranked:
+            doc_id = meta.get("doc_id", "")
+            if doc_id in seen_docs:
+                continue
+            seen_docs.add(doc_id)
+            reranked_results.append(RetrievalResult(
+                text=doc_text, score=float(score), metadata=meta,
+            ))
+            if len(reranked_results) >= rerank_top_n:
+                break
+
+        return StagedRetrievalResult(vector_results, reranked_results)
